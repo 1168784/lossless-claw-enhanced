@@ -291,6 +291,47 @@ LCM_CONTEXT_THRESHOLD=0.75
 - **incrementalMaxDepth=-1** enables unlimited automatic condensation after each compaction pass — the DAG cascades as deep as needed. Set to `0` (default) for leaf-only, or a positive integer for a specific depth cap.
 - **contextThreshold=0.75** triggers compaction when context reaches 75% of the model's window, leaving headroom for the model's response.
 
+### OpenClaw session reset settings
+
+LCM preserves history through compaction, but it does **not** change OpenClaw's core session reset policy. If sessions are resetting sooner than you want, increase OpenClaw's `session.reset.idleMinutes` or use a channel/type-specific override.
+
+```json
+{
+  "session": {
+    "reset": {
+      "mode": "idle",
+      "idleMinutes": 10080
+    }
+  }
+}
+```
+
+- `session.reset.mode: "idle"` keeps a session alive until the idle window expires.
+- `session.reset.idleMinutes` is the actual reset interval in minutes.
+- OpenClaw does **not** currently enforce a maximum `idleMinutes`; in source it is validated only as a positive integer.
+- If you also use daily reset mode, `idleMinutes` acts as a secondary guard and the session resets when **either** the daily boundary or the idle window is reached first.
+- Legacy `session.idleMinutes` still works, but OpenClaw prefers `session.reset.idleMinutes`.
+
+Useful values:
+
+- `1440` = 1 day
+- `10080` = 7 days
+- `43200` = 30 days
+- `525600` = 365 days
+
+For most long-lived LCM setups, a good starting point is:
+
+```json
+{
+  "session": {
+    "reset": {
+      "mode": "idle",
+      "idleMinutes": 10080
+    }
+  }
+}
+```
+
 ## How it works
 
 See [docs/architecture.md](docs/architecture.md) for the full technical deep-dive. Here's the summary:
