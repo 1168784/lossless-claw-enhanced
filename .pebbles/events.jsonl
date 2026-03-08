@@ -55,3 +55,4 @@
 {"type":"status_update","timestamp":"2026-02-26T22:53:21.34072Z","issue_id":"lossless-claw-bc1","payload":{"status":"in_progress"}}
 {"type":"status_update","timestamp":"2026-02-26T22:53:26.389687Z","issue_id":"lossless-claw-bc1","payload":{"status":"in_progress"}}
 {"type":"close","timestamp":"2026-02-26T22:57:18.867227Z","issue_id":"lossless-claw-bc1","payload":{}}
+{"type":"create","timestamp":"2026-03-08T07:28:17.348889Z","issue_id":"lossless-claw-b05","payload":{"description":"openclaw.plugin.json declares incrementalMaxDepth with minimum: 0, but the runtime and README both support -1 to mean unlimited incremental condensation. OpenClaw rejects a config using -1 and the gateway fails to start until the manifest is fixed.","priority":"2","title":"Manifest blocks incrementalMaxDepth=-1","type":"bug"}}

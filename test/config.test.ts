@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import manifest from "../openclaw.plugin.json" with { type: "json" };
 import { resolveLcmConfig } from "../src/db/config.js";
 
 describe("resolveLcmConfig", () => {
@@ -108,5 +109,9 @@ describe("resolveLcmConfig", () => {
       { databasePath: "/plugin/path/lcm.db" },
     );
     expect(config.databasePath).toBe("/env/path/lcm.db");
+  });
+
+  it("ships a manifest that accepts unlimited incremental depth", () => {
+    expect(manifest.configSchema.properties.incrementalMaxDepth.minimum).toBe(-1);
   });
 });

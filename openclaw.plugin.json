@@ -7,7 +7,7 @@
     },
     "incrementalMaxDepth": {
       "label": "Incremental Max Depth",
-      "help": "How deep incremental compaction goes (0 = leaf only)"
+      "help": "How deep incremental compaction goes (0 = leaf only, -1 = unlimited)"
     },
     "freshTailCount": {
       "label": "Fresh Tail Count",
@@ -32,7 +32,7 @@
       },
       "incrementalMaxDepth": {
         "type": "integer",
-        "minimum": 0
+        "minimum": -1
       },
       "freshTailCount": {
         "type": "integer",
