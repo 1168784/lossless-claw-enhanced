@@ -50,18 +50,25 @@ All cherry-picks were reviewed by OpenAI Codex with 3 additional fixes applied:
 - FTS table operations guarded with try/catch for no-FTS runtimes
 - CJK migration reordered before `backfillSummaryMetadata` so derived fields use corrected values
 
-## Install from source
+## Install
 
-This fork is not published to npm. Install directly from GitHub:
+### One-line install from GitHub
 
 ```bash
-# Clone the repo
+openclaw plugins install github:win4r/lossless-claw-enhanced
+```
+
+### Install from local clone
+
+If you want to develop or customize:
+
+```bash
 git clone https://github.com/win4r/lossless-claw-enhanced.git
 
-# Install into OpenClaw using --link (symlink, picks up changes instantly)
+# Link install (symlink, picks up code changes instantly — best for development)
 openclaw plugins install --link /path/to/lossless-claw-enhanced
 
-# Or copy-install (snapshot, won't pick up later changes)
+# Or copy install (snapshot, won't pick up later changes)
 openclaw plugins install /path/to/lossless-claw-enhanced
 ```
 
