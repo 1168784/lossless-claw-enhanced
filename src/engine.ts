@@ -2107,25 +2107,21 @@ export class LcmContextEngine implements ContextEngine {
       return { ingested: false };
     }
 
-    // Skip assistant messages that failed with an error and have no useful content.
-    // These occur when an API call returns a 500 or similar transient error.
-    // Ingesting them pollutes the LCM database: on retry, the error messages
-    // accumulate and get assembled into context, creating a positive feedback
-    // loop where each retry sends an increasingly large (and malformed) payload
-    // that continues to fail.
+    // Skip assistant messages that have no useful content regardless of
+    // stopReason. Upstream issue #23: the original guard only filtered
+    // stopReason error/aborted, letting undefined / stream-interrupted
+    // empties through. One such row (seq 137) ended up duplicated 72x
+    // in a single session because nothing downstream caught it either.
     if (message.role === "assistant") {
       const topLevel = message as unknown as Record<string, unknown>;
-      const stopReason = topLevel.stopReason;
-      if (stopReason === "error" || stopReason === "aborted") {
-        const content = topLevel.content;
-        const isEmpty =
-          content === undefined ||
-          content === null ||
-          content === "" ||
-          (Array.isArray(content) && content.length === 0);
-        if (isEmpty) {
-          return { ingested: false };
-        }
+      const content = topLevel.content;
+      const isEmpty =
+        content === undefined ||
+        content === null ||
+        content === "" ||
+        (Array.isArray(content) && content.length === 0);
+      if (isEmpty) {
+        return { ingested: false };
       }
     }
 
@@ -2163,6 +2159,21 @@ export class LcmContextEngine implements ContextEngine {
         const rewrittenStored = toStoredMessage(intercepted.rewrittenMessage);
         stored.content = rewrittenStored.content;
         stored.tokenCount = rewrittenStored.tokenCount;
+      }
+    }
+
+    // Content-level idempotency backstop (upstream issue #23). Acts after
+    // deduplicateAfterTurnBatch when that path bails via any of its
+    // prefix-mismatch branches. Scoped to non-empty assistant rows:
+    // - user "ok"/"yes" can legitimately repeat
+    // - tool/toolResult rows normalize their stored content to "" (the
+    //   structure lives in message_parts), so (role, content) identity
+    //   would false-positive every new tool call
+    // F3 above already drops empty-content assistant rows, which were the
+    // dominant duplicate profile (72x on seq 137 in the incident).
+    if (stored.role === "assistant" && stored.content.length > 0) {
+      if (await this.conversationStore.hasMessage(conversationId, stored.role, stored.content)) {
+        return { ingested: false };
       }
     }
 
